@@ -8,6 +8,7 @@ $(async function() {
   const $ownStories = $("#my-articles");
   const $navLogin = $("#nav-login");
   const $navLogOut = $("#nav-logout");
+  const $navSubmit = $("#nav-submit");
 
   // global storyList variable
   let storyList = null;
@@ -78,6 +79,42 @@ $(async function() {
     $createAccountForm.slideToggle();
     $allStoriesList.toggle();
   });
+
+/**
+   * toggle from and other things when submitting an article
+   */
+
+  $navSubmit.on("click", function() {
+      hideElements();
+      $allStoriesList.show();
+      $submitForm.slideToggle();
+  });
+
+  /**
+   * submit form for new post handler
+   */
+  $submitForm.on('submit', async function(e){
+    e.preventDefault();
+    let title = $("#title").val();
+    let author = $("#author").val();
+    let url = $("#url").val();
+    let username = currentUser.username;
+    const hostName = getHostName(url);
+    console.log(title);
+    console.log(author);
+    console.log(url);
+    console.log(username);
+    console.log(hostName);
+
+
+    const storyObject = await storyList.addStory(currentUser,{
+      title,
+      author,
+      url,
+      username
+    })
+    console.log(storyObject)
+  })
 
   /**
    * Event handler for Navigation to Homepage
