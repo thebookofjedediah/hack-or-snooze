@@ -100,20 +100,20 @@ $(async function() {
     let url = $("#url").val();
     let username = currentUser.username;
     const hostName = getHostName(url);
-    console.log(title);
-    console.log(author);
-    console.log(url);
-    console.log(username);
-    console.log(hostName);
 
 
-    const storyObject = await storyList.addStory(currentUser,{
+    const storyObject = await storyList.addStory(currentUser, {
       title,
       author,
       url,
       username
-    })
-    console.log(storyObject)
+    });
+
+    await generateStories();
+    $allStoriesList.show();
+
+    // reset the form
+    $submitForm.trigger("reset");
   })
 
   /**
