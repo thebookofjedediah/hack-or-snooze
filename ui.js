@@ -6,9 +6,11 @@ $(async function() {
   const $loginForm = $("#login-form");
   const $createAccountForm = $("#create-account-form");
   const $ownStories = $("#my-articles");
+  const $favoriteStories = $("#favorited-articles");
   const $navLogin = $("#nav-login");
   const $navLogOut = $("#nav-logout");
   const $navSubmit = $("#nav-submit");
+  const $navFavorites = $("#nav-favorites");
 
   // global storyList variable
   let storyList = null;
@@ -116,6 +118,52 @@ $(async function() {
     $submitForm.trigger("reset");
   })
 
+    /**
+   * Showing favorites via button
+   */
+  $navFavorites.on('click', function(e){
+    e.preventDefault();
+    hideElements();
+    generateFavorites();
+    $allStoriesList.hide();
+    $favoriteStories.show();
+  })
+
+    /**
+   * Generating Favorites using the story generation
+   */
+
+   function generateFavorites(){
+     for (let story of currentUser.favorites){
+        let favoritesList = generateStoryHTML(story, false, true);
+        $favoriteStories.append(favoritesList);  
+     }
+   }
+
+    /**
+   * adding favorites
+   */
+
+  $(".articles-container").on("click", ".star", async function(evt) {
+    if (currentUser) {
+      const $tgt = $(evt.target);
+      const $closestLi = $tgt.closest("li");
+      const storyId = $closestLi.attr("id");
+
+      // if the item is already favorited
+      if ($tgt.hasClass("fas")) {
+        // remove the favorite from the user's list
+        await currentUser.removeFavorite(storyId);
+        // then change the class to be an empty star
+        $tgt.closest("i").toggleClass("fas far");
+      } else {
+        // the item is un-favorited
+        await currentUser.addFavorite(storyId);
+        $tgt.closest("i").toggleClass("fas far");
+      }
+    }
+  });
+
   /**
    * Event handler for Navigation to Homepage
    */
@@ -191,15 +239,20 @@ $(async function() {
    * A function to render HTML for an individual Story instance
    */
 
-  function generateStoryHTML(story) {
+  function generateStoryHTML(story, isOwnStory) {
     let hostName = getHostName(story.url);
+    let starType = isFavorite(story) ? "fas" : "far";
 
-    // render story markup
+
+    // render all the rest of the story markup
     const storyMarkup = $(`
       <li id="${story.storyId}">
+        <span class="star">
+          <i class="${starType} fa-star"></i>
+        </span>
         <a class="article-link" href="${story.url}" target="a_blank">
           <strong>${story.title}</strong>
-        </a>
+          </a>
         <small class="article-author">by ${story.author}</small>
         <small class="article-hostname ${hostName}">(${hostName})</small>
         <small class="article-username">posted by ${story.username}</small>
@@ -207,6 +260,15 @@ $(async function() {
     `);
 
     return storyMarkup;
+  }
+
+  /* see favorite stories */
+  function isFavorite(story) {
+    let favStoryIds = new Set();
+    if (currentUser) {
+      favStoryIds = new Set(currentUser.favorites.map(obj => obj.storyId));
+    }
+    return favStoryIds.has(story.storyId);
   }
 
   /* hide all elements in elementsArr */

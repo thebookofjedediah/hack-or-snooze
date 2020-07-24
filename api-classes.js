@@ -167,6 +167,27 @@ class User {
     existingUser.ownStories = response.data.user.stories.map(s => new Story(s));
     return existingUser;
   }
+
+  async addFavorite(storyId){
+    await axios({
+      method: "POST",
+      url: `${BASE_URL}/users/${this.username}/favorites/${storyId}`,
+      data: {
+        token: this.loginToken
+      }
+    })
+  }
+
+  async removeFavorite(storyId){
+    await axios({
+      method: "DELETE",
+      url: `${BASE_URL}/users/${this.username}/favorites/${storyId}`,
+      data: {
+        token: this.loginToken
+      }
+    })
+  }
+
 }
 
 /**
