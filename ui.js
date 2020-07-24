@@ -11,6 +11,7 @@ $(async function() {
   const $navLogOut = $("#nav-logout");
   const $navSubmit = $("#nav-submit");
   const $navFavorites = $("#nav-favorites");
+  const $navStories = $("#nav-stories");
 
   // global storyList variable
   let storyList = null;
@@ -129,16 +130,53 @@ $(async function() {
     $favoriteStories.show();
   })
 
+      /**
+   * Showing my stories via button
+   */
+  $navStories.on('click', function(e){
+    e.preventDefault();
+    hideElements();
+    generateMyStories();
+
+  })
+
     /**
-   * Generating Favorites using the story generation
+   * Event Handler for Deleting a Single Story
    */
 
-   function generateFavorites(){
-     for (let story of currentUser.favorites){
-        let favoritesList = generateStoryHTML(story, false, true);
-        $favoriteStories.append(favoritesList);  
-     }
+  $ownStories.on("click", ".trash-can", async function(evt) {
+    // get the Story's ID
+    const $closestLi = $(evt.target).closest("li");
+    const storyId = $closestLi.attr("id");
+
+    // remove the story from the API
+    await storyList.removeStory(currentUser, storyId);
+
+    // re-generate the story list
+    await generateStories();
+
+    // hide everyhing
+    hideElements();
+
+    // ...except the story list
+    $allStoriesList.show();
+  });
+
+    /**
+   * A rendering function to call the StoryList.getStories static method,
+   *  which will generate a storyListInstance. Then render it.
+   */
+
+  async function generateFavorites() {
+    // empty out that part of the page
+    $favoriteStories.empty();
+
+    // loop through all of our favorite stories and generate HTML for them
+    for (let story of currentUser.favorites){
+      let favoritesList = generateStoryHTML(story, false, true);
+      $favoriteStories.append(favoritesList);  
    }
+  }
 
     /**
    * adding favorites
@@ -243,10 +281,17 @@ $(async function() {
     let hostName = getHostName(story.url);
     let starType = isFavorite(story) ? "fas" : "far";
 
+    // render a trash can for deleting your own story
+    const trashCanIcon = isOwnStory
+      ? `<span class="trash-can">
+          <i class="fas fa-trash-alt"></i>
+        </span>`
+      : "";
 
     // render all the rest of the story markup
     const storyMarkup = $(`
       <li id="${story.storyId}">
+        ${trashCanIcon}
         <span class="star">
           <i class="${starType} fa-star"></i>
         </span>
@@ -270,6 +315,25 @@ $(async function() {
     }
     return favStoryIds.has(story.storyId);
   }
+
+  function generateMyStories() {
+    $ownStories.empty();
+
+    // if the user has no stories that they have posted
+    if (currentUser.ownStories.length === 0) {
+      $ownStories.append("<h5>No stories added by user yet!</h5>");
+    } else {
+      // for all of the user's posted stories
+      for (let story of currentUser.ownStories) {
+        // render each story in the list
+        let ownStoryHTML = generateStoryHTML(story, true);
+        $ownStories.append(ownStoryHTML);
+      }
+    }
+
+    $ownStories.show();
+  }
+
 
   /* hide all elements in elementsArr */
 
