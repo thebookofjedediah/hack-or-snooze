@@ -12,6 +12,8 @@ $(async function() {
   const $navSubmit = $("#nav-submit");
   const $navFavorites = $("#nav-favorites");
   const $navStories = $("#nav-stories");
+  const $navProfile = $("#nav-profile");
+  const $myProfile = $("#user-profile");
 
   // global storyList variable
   let storyList = null;
@@ -128,6 +130,15 @@ $(async function() {
     generateFavorites();
     $allStoriesList.hide();
     $favoriteStories.show();
+  })
+
+      /**
+   * Showing favorites via button
+   */
+  $navProfile.on('click', function(e){
+    e.preventDefault();
+    hideElements();
+    showMyProfile();
   })
 
       /**
@@ -273,6 +284,22 @@ $(async function() {
     }
   }
 
+    /**
+   * get current user data and display in the DOM 
+   */
+
+  function showMyProfile() {
+    // show your name
+    $("#profile-name").text(`Name: ${currentUser.name}`);
+    // show your username
+    $("#profile-username").text(`Username: ${currentUser.username}`);
+    // format and display the account creation date
+    $("#profile-account-date").text(
+      `Account Created: ${currentUser.createdAt.slice(0, 10)}`
+    );
+    $myProfile.show();
+  }
+
   /**
    * A function to render HTML for an individual Story instance
    */
@@ -344,7 +371,9 @@ $(async function() {
       $filteredArticles,
       $ownStories,
       $loginForm,
-      $createAccountForm
+      $createAccountForm,
+      $myProfile,
+      $favoriteStories
     ];
     elementsArr.forEach($elem => $elem.hide());
   }
